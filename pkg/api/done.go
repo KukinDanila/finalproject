@@ -1,0 +1,43 @@
+package api
+
+import (
+	"net/http"
+	"time"
+
+	"finalproject/pkg/db"
+)
+
+func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+
+	if id == "" {
+		writeJson(w, map[string]string{"error": "не указан идентификатор"})
+		return
+	}
+
+	task, err := db.GetTask(id)
+	if err != nil {
+		writeJson(w, map[string]string{"error": "задача не найдена"})
+		return
+	}
+
+	if task.Repeat == "" {
+		if err := db.DeleteTask(id); err != nil {
+			writeJson(w, map[string]string{"error": err.Error()})
+			return
+		}
+	} else {
+		next, err := NextDate(time.Now(), task.Date, task.Repeat)
+		if err != nil {
+			writeJson(w, map[string]string{"error": err.Error()})
+			return
+		}
+
+		if err := db.UpdateDate(next, id); err != nil {
+			writeJson(w, map[string]string{"error": err.Error()})
+			return
+		}
+	}
+
+	writeJson(w, map[string]string{})
+}
