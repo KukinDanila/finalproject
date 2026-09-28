@@ -14,11 +14,11 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := db.Tasks(50, search)
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJson(w, TasksResp{
+	writeJson(w, http.StatusOK, TasksResp{
 		Tasks: tasks,
 	})
 }
@@ -27,31 +27,31 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	if id == "" {
-		writeJson(w, map[string]string{"error": "не указан идентификатор"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": "не указан идентификатор"})
 		return
 	}
 
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJson(w, map[string]string{"error": "задача не найдена"})
+		writeJson(w, http.StatusNotFound, map[string]string{"error": "задача не найдена"})
 		return
 	}
 
-	writeJson(w, task)
+	writeJson(w, http.StatusOK, task)
 }
 
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	if id == "" {
-		writeJson(w, map[string]string{"error": "не указан идентификатор"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": "не указан идентификатор"})
 		return
 	}
 
 	if err := db.DeleteTask(id); err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJson(w, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]string{})
 }

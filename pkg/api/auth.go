@@ -57,29 +57,29 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r.Body); err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
 	if err := json.Unmarshal(buf.Bytes(), &req); err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	storedPassword := os.Getenv("TODO_PASSWORD")
 
 	if req.Password != storedPassword {
-		writeJson(w, map[string]string{"error": "неверный пароль"})
+		writeJson(w, http.StatusUnauthorized, map[string]string{"error": "неверный пароль"})
 		return
 	}
 
 	token, err := generateToken(req.Password)
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJson(w, map[string]string{"token": token})
+	writeJson(w, http.StatusOK, map[string]string{"token": token})
 }
 
 func auth(next http.HandlerFunc) http.HandlerFunc {

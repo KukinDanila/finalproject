@@ -9,7 +9,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/scheduler .
 
-FROM ubuntu:latest
+FROM alpine:latest
 
 WORKDIR /app
 

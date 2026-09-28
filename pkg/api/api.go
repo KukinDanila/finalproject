@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -13,15 +14,19 @@ func Init() {
 	http.HandleFunc("/api/task/done", auth(doneTaskHandler))
 }
 
-func writeJson(w http.ResponseWriter, data any) {
+func writeJson(w http.ResponseWriter, status int, data any) {
 	resp, err := json.Marshal(data)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("marshal response: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(resp)
+	w.WriteHeader(status)
+	if _, err := w.Write(resp); err != nil {
+		log.Printf("write response: %v", err)
+	}
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +39,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		updateTaskHandler(w, r)
 	case http.MethodDelete:
 		deleteTaskHandler(w, r)
+	default:
+		writeJson(w, http.StatusMethodNotAllowed, map[string]string{"error": "метод не поддерживается"})
 	}
 }

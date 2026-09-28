@@ -17,10 +17,7 @@ func main() {
 	if err := db.Init(dbFile); err != nil {
 		log.Fatal(err)
 	}
-
-	//now, _ := time.Parse("20060102", "20240126")
-	//result, err := api.NextDate(now, "20240113", "d 7")
-	//fmt.Println("Результат:", result, "Ошибка:", err)
+	defer db.Close()
 
 	if err := server.Run(); err != nil {
 		log.Fatal(err)

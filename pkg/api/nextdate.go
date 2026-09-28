@@ -183,6 +183,11 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 }
 
 func nextDayHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "метод не поддерживается", http.StatusMethodNotAllowed)
+		return
+	}
+
 	nowParam := r.FormValue("now")
 	dateParam := r.FormValue("date")
 	repeat := r.FormValue("repeat")
